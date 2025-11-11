@@ -1,107 +1,31 @@
-### Enviar notificação de discordância
-POST http://localhost:3000/api/send-notification
-Content-Type: application/json
 
-{
-  "chamado": {
-    "chamado_os": "OS-12345",
-    "nome_cliente": "Cliente de Teste",
-    "status_chamado": "pendente",
-    "dtini_os": "2023-11-20",
-    "hrini_os": "09:00",
-    "hrfim_os": "12:00",
-    "total_horas": "3 horas",
-    "obs": "Observação inicial do chamado"
-  },
-  "observacao": "O cliente não concorda com o valor cobrado pelo serviço, alegando que não foi informado previamente sobre taxas adicionais."
-}
+# ========================================
+# API ORDENS-SERVIÇO
+# ========================================
 
-### Teste com dados incompletos (deve retornar erro)
-POST http://localhost:3000/api/send-notification
-Content-Type: application/json
+### Buscar todas as OS's com (admin)
+GET http://localhost:3000/api/ordens-servico?isAdmin=true&mes=11&ano=2025
 
-{
-  "chamado": {
-    "chamado_os": "OS-12345"
-  }
-}
+### Buscar todas as OS's com (admin) e filtra por codCliente
+GET http://localhost:3000/api/ordens-servico?isAdmin=true&mes=11&ano=2025&codClienteFilter=120
 
-# --------------------------------------------------------------------------------
+### Buscar todas as OS's com (admin) e filtra por codCliente e codRecurso
+GET http://localhost:3000/api/ordens-servico?isAdmin=true&mes=11&ano=2025&codClienteFilter=120&codRecursoFilter=122
 
-### Buscar todos os chamados com (admin)
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true
+# ===============================================================================================================================================
 
-### Buscar todos os chamados não admin, utilizando codRecurso obrigatório
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=false&codRecurso=144
+# ========================================
+# API HRS-CONTRATADAS-HRS-EXECUTADAS
+# ========================================
 
-### Buscar todos os chamados filtrando pelo cliente
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&cliente=DOX+BRASIL
+### Buscar todas as OS's com (admin)
+GET http://localhost:3000/api/hrs-contratadas-hrs-executadas?isAdmin=true&mes=11&ano=2025
 
-### Buscar todos os chamados filtrando pelo recurso
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&recurso=DENIS+BARROS
+### Buscar todas as OS's com (admin) e filtra por codCliente
+GET http://localhost:3000/api/hrs-contratadas-hrs-executadas?isAdmin=true&mes=11&ano=2025&codClienteFilter=120
 
-### Buscar todos os chamados filtrando pelo status
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&status=STANDBY
+### Buscar todas as OS's com (admin) e filtra por codCliente e codRecurso
+GET http://localhost:3000/api/hrs-contratadas-hrs-executadas?isAdmin=true&mes=11&ano=2025&codClienteFilter=120&codRecursoFilter=122
 
-### Buscar todos os chamados filtrando pelo cliente e recurso
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&cliente=DOX+BRASIL&recurso=DENIS+BARROS
 
-### Buscar todos os chamados filtrando pelo cliente e status
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&cliente=DOX+BRASIL&status=STANDBY
-
-### Buscar todos os chamados filtrando pelo recurso e status
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&recurso=DENIS+BARROS&status=FINALIZADO
-
-### Buscar todos os chamados filtrando pelo recurso e status
-GET http://localhost:3000/api/chamados-abertos/tabelas/tabela-chamados-abertos?mes=6&ano=2025&isAdmin=true&cliente=DOX+BRASIL&recurso=DENIS+BARROS&status=FINALIZADO
-
-# --------------------------------------------------------------------------------
-
-# Filtros de clientes
-### Buscar clientes com filtro de mês e ano (admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/clientes?mes=6&ano=2025&isAdmin=true
-
-### Buscar clientes com filtro de mês, ano e codRecurso (não admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/clientes?mes=6&ano=2025&isAdmin=false&codRecurso=144
-
-# --------------------------------------------------------------------------------
-
-# Filtros de recursos
-### Buscar recursos com filtro de mês e ano (admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/recursos?mes=6&ano=2025&isAdmin=true
-
-### Buscar recursos com filtro de mês, ano e codRecurso (não admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/recursos?mes=6&ano=2025&isAdmin=false&codRecurso=144
-
-# --------------------------------------------------------------------------------
-
-# Filtros de status
-### Buscar status com filtro de mês e ano (admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/status?mes=6&ano=2025&isAdmin=true
-
-### Buscar status com filtro de mês, ano e codRecurso (não admin)
-GET http://localhost:3000/api/chamados-abertos/filtros/status?mes=6&ano=2025&isAdmin=false&codRecurso=144
-
-# --------------------------------------------------------------------------------
-
-### Buscar todos os COD_CLIENTE, NOME_CLIENTE e EMAIL_CLIENTE
-GET http://localhost:3000/api/chamados-abertos/clientes?mes=6&ano=2025&isAdmin=true
-
-### Buscar todos os COD_RECURSO, NOME_RECURSO e EMAIL_RECURSO
-GET http://localhost:3000/api/chamados-abertos/recursos?mes=6&ano=2025&isAdmin=true
-
-# --------------------------------------------------------------------------------
-
-### Teste: atribuir chamado (modo teste, sem alterar o banco)
-POST http://localhost:3000/api/chamados-abertos/atribuir-chamados
-Content-Type: application/json
-
-{
-  "cod_chamado": 12797,
-  "cod_cliente": 78,
-  "cod_recurso": 144,
-  "enviarEmailCliente": false,
-  "enviarEmailRecurso": true
-}
-
-# --------------------------------------------------------------------------------
+# ===============================================================================================================================================
