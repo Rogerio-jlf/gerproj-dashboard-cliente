@@ -58,6 +58,34 @@ function getNomeMes(mes: string): string {
 }
 
 // ================================================================================
+// COMPONENTE DE LOADING SPINNER
+// ================================================================================
+function LoadingSpinner() {
+  return (
+    <svg
+      className="animate-spin h-6 w-6 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  );
+}
+
+// ================================================================================
 // COMPONENTE
 // ================================================================================
 export function ExportaPDFButton({
@@ -67,17 +95,20 @@ export function ExportaPDFButton({
   columns,
   footerText = 'Gerado pelo sistema em',
   className = '',
-  disabled = false, // ← ADICIONAR
+  disabled = false,
 }: ExportaPDFButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     if (data.length === 0) {
       alert('Não há dados para exportar!');
       return;
     }
 
     setIsExporting(true);
+
+    // Pequeno delay para garantir que o loading apareça
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
       const doc = new jsPDF('l', 'mm', 'a4');
@@ -114,6 +145,7 @@ export function ExportaPDFButton({
       // ================================================================================
       doc.setFillColor(0, 0, 0);
       doc.rect(15, yPosition, 80, 6, 'F');
+      doc.setDrawColor(229, 231, 235);
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(10);
@@ -165,7 +197,6 @@ export function ExportaPDFButton({
       ];
 
       totalizadores.forEach((tot) => {
-        // Label (cabeçalho)
         doc.setFillColor(tot.color[0], tot.color[1], tot.color[2]);
         doc.rect(15, yPosition, 35, 6, 'F');
 
@@ -174,11 +205,9 @@ export function ExportaPDFButton({
         doc.setFont('helvetica', 'bold');
         doc.text(tot.label, 32.5, yPosition + 4, { align: 'center' });
 
-        // Valor
         doc.setFillColor(255, 255, 255);
         doc.rect(50, yPosition, 45, 6);
         doc.setDrawColor(229, 231, 235);
-        doc.rect(50, yPosition, 45, 6);
 
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
@@ -199,7 +228,6 @@ export function ExportaPDFButton({
         return columns.map((col) => {
           const value = (row as any)[col.key];
 
-          // Formatações específicas
           if (col.key === 'chamado_os') {
             if (value) {
               return formatarNumeros(String(value));
@@ -226,7 +254,6 @@ export function ExportaPDFButton({
               corrigirTextoCorrompido(String(value || null)),
             );
           }
-
           if (col.key === 'hrini_os') {
             return formatarHora(String(value || null));
           }
@@ -236,7 +263,6 @@ export function ExportaPDFButton({
           if (col.key === 'total_horas') {
             return String(value || 'n/a');
           }
-
           if (col.key === 'obs') {
             return corrigirTextoCorrompido(String(value || 'Sem observação'));
           }
@@ -245,19 +271,18 @@ export function ExportaPDFButton({
         });
       });
 
-      // Configurar estilos de colunas dinamicamente
       const columnStyles: any = {
-        0: { cellWidth: 15, halign: 'center' }, // N° OS
-        1: { cellWidth: 15, halign: 'center' }, // CÓD. OS
-        2: { cellWidth: 15, halign: 'center' }, // Data
-        3: { cellWidth: 35, halign: 'left' }, // Cliente
-        4: { cellWidth: 30, halign: 'left' }, // Status
-        5: { cellWidth: 35, halign: 'left' }, // Consultor
-        6: { cellWidth: 15, halign: 'center' }, // HR INÍCIO
-        7: { cellWidth: 15, halign: 'center' }, // HR FIM
-        8: { cellWidth: 15, halign: 'center' }, // HR's GASTAS
-        9: { cellWidth: 15, halign: 'center' }, // Validação
-        10: { cellWidth: 60, halign: 'left' }, // Observação
+        0: { cellWidth: 18, halign: 'center' },
+        1: { cellWidth: 12, halign: 'center' },
+        2: { cellWidth: 17, halign: 'center' },
+        3: { cellWidth: 35, halign: 'left' },
+        4: { cellWidth: 27, halign: 'left' },
+        5: { cellWidth: 35, halign: 'left' },
+        6: { cellWidth: 17, halign: 'center' },
+        7: { cellWidth: 15, halign: 'center' },
+        8: { cellWidth: 17, halign: 'center' },
+        9: { cellWidth: 20, halign: 'center' },
+        10: { cellWidth: 64, halign: 'left' },
       };
 
       autoTable(doc, {
@@ -280,42 +305,37 @@ export function ExportaPDFButton({
         },
         columnStyles: columnStyles,
         didParseCell: (data) => {
-          // Colorir células de Status
           if (data.column.index === 4 && data.section === 'body') {
             const status = data.cell.text[0]?.toLowerCase();
 
-            if (
-              status?.includes('concluído') ||
-              status?.includes('concluido')
-            ) {
-              data.cell.styles.fillColor = [34, 197, 94]; // Verde
+            if (status?.includes('concluído') || status?.includes('concluido')) {
+              data.cell.styles.fillColor = [34, 197, 94];
               data.cell.styles.textColor = [255, 255, 255];
               data.cell.styles.fontStyle = 'bold';
             } else if (status?.includes('andamento')) {
-              data.cell.styles.fillColor = [234, 179, 8]; // Amarelo
+              data.cell.styles.fillColor = [234, 179, 8];
               data.cell.styles.textColor = [0, 0, 0];
               data.cell.styles.fontStyle = 'bold';
             } else if (status?.includes('pendente')) {
-              data.cell.styles.fillColor = [239, 68, 68]; // Vermelho
+              data.cell.styles.fillColor = [239, 68, 68];
               data.cell.styles.textColor = [255, 255, 255];
               data.cell.styles.fontStyle = 'bold';
             } else if (status?.includes('cancelado')) {
-              data.cell.styles.fillColor = [107, 114, 128]; // Cinza
+              data.cell.styles.fillColor = [107, 114, 128];
               data.cell.styles.textColor = [255, 255, 255];
               data.cell.styles.fontStyle = 'bold';
             }
           }
 
-          // Colorir células de Validação
           if (data.column.index === 8 && data.section === 'body') {
             const validacao = data.cell.text[0]?.toUpperCase();
 
             if (validacao === 'SIM') {
-              data.cell.styles.fillColor = [59, 130, 246]; // Azul
+              data.cell.styles.fillColor = [59, 130, 246];
               data.cell.styles.textColor = [255, 255, 255];
               data.cell.styles.fontStyle = 'bold';
             } else if (validacao === 'NAO' || validacao === 'NÃO') {
-              data.cell.styles.fillColor = [239, 68, 68]; // Vermelho
+              data.cell.styles.fillColor = [239, 68, 68];
               data.cell.styles.textColor = [255, 255, 255];
               data.cell.styles.fontStyle = 'bold';
             }
@@ -345,13 +365,20 @@ export function ExportaPDFButton({
     <button
       onClick={exportToPDF}
       disabled={isExporting || disabled}
-      title={disabled ? 'Não há dados para exportar' : 'Exportar para PDF'}
-      className={`group cursor-pointer rounded-md bg-gradient-to-br from-red-600 to-red-700 p-3 shadow-md shadow-black hover:shadow-xl hover:shadow-black transition-all hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      title={
+        disabled
+          ? 'Não há dados para exportar'
+          : isExporting
+            ? 'Gerando PDF...'
+            : 'Exportar para PDF'
+      }
+      className={`group cursor-pointer rounded-md bg-gradient-to-br from-red-600 to-red-700 p-3 shadow-md shadow-black hover:shadow-xl hover:shadow-black transition-all hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${className}`}
     >
-      <FaFilePdf
-        className={`text-white ${isExporting ? 'animate-pulse' : 'group-hover:scale-110'}`}
-        size={24}
-      />
+      {isExporting ? (
+        <LoadingSpinner />
+      ) : (
+        <FaFilePdf className="text-white group-hover:scale-110" size={24} />
+      )}
     </button>
   );
 }

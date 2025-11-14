@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { formatarHorasTotaisSufixo } from '@/formatters/formatar-hora';
 import { formatarNumeros } from '@/formatters/formatar-numeros';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -130,14 +131,10 @@ interface FilterProps {
 }
 
 export function Graficos({ filters }: FilterProps) {
+  const { isAdmin, codCliente } = useAuth();
   const [dados, setDados] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Simulação de contexto de autenticação (substitua pelo seu useAuth)
-  // const { isAdmin, codCliente } = useAuth();
-  const isAdmin = true; // Exemplo
-  const codCliente = ''; // Exemplo
 
   const buscarDados = useCallback(async () => {
     setLoading(true);

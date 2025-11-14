@@ -32,7 +32,7 @@ interface ExportaExcelButtonProps {
   filename?: string;
   buttonText?: string;
   className?: string;
-  disabled?: boolean; // ← ADICIONAR
+  disabled?: boolean;
 }
 
 // ================================================================================
@@ -48,18 +48,49 @@ function getColumnLetter(index: number): string {
 }
 
 // ================================================================================
+// COMPONENTE DE LOADING SPINNER
+// ================================================================================
+function LoadingSpinner() {
+  return (
+    <svg
+      className="animate-spin h-6 w-6 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  );
+}
+
+// ================================================================================
 // COMPONENTE
 // ================================================================================
 export function ExportaExcelButton({
   data,
   filtros,
   className = '',
-  disabled = false, // ← ADICIONAR
+  disabled = false,
 }: ExportaExcelButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const exportToExcel = async () => {
     setIsExporting(true);
+
+    // Pequeno delay para garantir que o loading apareça
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
       const workbook = new ExcelJS.Workbook();
@@ -71,7 +102,7 @@ export function ExportaExcelButton({
       // ================================================================================
       // CABEÇALHO DO RELATÓRIO
       // ================================================================================
-      const numColunas = 11; // Todas as colunas incluídas
+      const numColunas = 11;
       const ultimaColuna = getColumnLetter(numColunas - 1);
 
       worksheet.mergeCells(`A${currentRow}:${ultimaColuna}${currentRow}`);
@@ -424,7 +455,7 @@ export function ExportaExcelButton({
               : 'left',
             vertical: 'middle',
             indent: colunasComIndentacao.includes(colIndex) ? 2 : 0,
-            wrapText: colIndex === 10, // Quebra de linha na observação
+            wrapText: colIndex === 10,
           };
           cell.border = {
             top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
@@ -460,17 +491,17 @@ export function ExportaExcelButton({
       // CONFIGURAÇÕES FINAIS
       // ================================================================================
       const columnWidths = [
-        { width: 15 }, // N° OS
-        { width: 15 }, // CÓD. OS
-        { width: 15 }, // DATA
-        { width: 35 }, // CLIENTE
-        { width: 30 }, // STATUS
-        { width: 35 }, // RECURSO
-        { width: 15 }, // HORA INÍCIO
-        { width: 15 }, // HORA FIM
-        { width: 15 }, // DURAÇÃO
-        { width: 15 }, // VALIDAÇÃO
-        { width: 60 }, // OBSERVAÇÃO
+        { width: 15 },
+        { width: 15 },
+        { width: 15 },
+        { width: 35 },
+        { width: 30 },
+        { width: 35 },
+        { width: 15 },
+        { width: 15 },
+        { width: 15 },
+        { width: 15 },
+        { width: 60 },
       ];
 
       worksheet.columns = columnWidths;
@@ -488,6 +519,7 @@ export function ExportaExcelButton({
       saveAs(blob, nomeArquivo);
     } catch (error) {
       console.error('Erro ao exportar Excel:', error);
+      alert('Erro ao gerar o Excel. Tente novamente.');
     } finally {
       setIsExporting(false);
     }
@@ -500,13 +532,20 @@ export function ExportaExcelButton({
     <button
       onClick={exportToExcel}
       disabled={isExporting || disabled}
-      title={disabled ? 'Não há dados para exportar' : 'Exportar para Excel'}
-      className={`group cursor-pointer rounded-md bg-gradient-to-br from-green-600 to-green-700 p-3 shadow-md shadow-black hover:shadow-xl hover:shadow-black transition-all hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      title={
+        disabled
+          ? 'Não há dados para exportar'
+          : isExporting
+            ? 'Gerando Excel...'
+            : 'Exportar para Excel'
+      }
+      className={`group cursor-pointer rounded-md bg-gradient-to-br from-green-600 to-green-700 p-3 shadow-md shadow-black hover:shadow-xl hover:shadow-black transition-all hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${className}`}
     >
-      <RiFileExcel2Fill
-        className={`text-white ${isExporting ? 'animate-pulse' : 'group-hover:scale-110'}`}
-        size={24}
-      />
+      {isExporting ? (
+        <LoadingSpinner />
+      ) : (
+        <RiFileExcel2Fill className="text-white group-hover:scale-110" size={24} />
+      )}
     </button>
   );
 }
