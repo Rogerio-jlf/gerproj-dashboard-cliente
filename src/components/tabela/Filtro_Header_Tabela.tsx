@@ -405,11 +405,11 @@ const InputFilterWithDebounce = memo(
             onClick={handleClear}
             aria-label="Limpar filtro"
             title="Limpar Filtro"
-            className="absolute top-1/2 right-3 -translate-y-1/2 bg-slate-300 p-1 rounded-full hover:bg-red-500 cursor-pointer shadow-sm shadow-black transition-all"
+            className="absolute top-1/2 right-3 -translate-y-1/2 bg-slate-300 p-0.5 rounded-full hover:bg-red-500 cursor-pointer shadow-sm shadow-black transition-all"
             type="button"
           >
             <IoClose
-              size={18}
+              size={16}
               className="text-black group-hover:text-white group-hover:rotate-180 transition-all"
             />
           </button>
